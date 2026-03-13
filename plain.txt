@@ -52,3 +52,34 @@ AI Chat Assistant	🟡 To Do
 
 
 
+✅ APIs You Can Use
+🔸 OpenAI API
+Endpoint: https://api.openai.com/v1/chat/completions
+
+Model: gpt-4 or gpt-3.5-turbo
+
+Use natural language prompts for recipes
+
+🔸 Spoonacular API
+https://spoonacular.com/food-api
+
+Endpoints:
+
+/recipes/parseIngredients
+
+/recipes/guessNutrition
+
+/recipes/findByIngredients
+
+🔸 Edamam API
+https://developer.edamam.com/
+
+Endpoints:
+
+/api/nutrition-details
+
+/api/recipes/v2 (for search with filters)
+
+
+
+

@@ -1,3 +1,60 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --background-light: #ffffff;
+  --text-primary-light: #333333;
+  --text-secondary-light: #666666;
+  
+  --background-dark: #1a1a1a;
+  --text-primary-dark: #ffffff;
+  --text-secondary-dark: #cccccc;
+}
+
+body {
+  @apply bg-white text-gray-900 dark:bg-gray-900 dark:text-white;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Dark mode styles for components */
+.recipe-card {
+  @apply bg-white/90 dark:bg-black/30 border border-amber-200/20 dark:border-white/10;
+}
+
+.recipe-title {
+  @apply text-gray-900 dark:text-white;
+}
+
+.recipe-cuisine,
+.recipe-category {
+  @apply bg-amber-50/10 dark:bg-amber-900/10 border-amber-200/20 dark:border-white/10 text-gray-900 dark:text-white;
+}
+
+.recipe-time {
+  @apply text-gray-600 dark:text-gray-300;
+}
+
+/* Sidebar dark mode */
+.dashboard-sidebar {
+  @apply bg-white/90 dark:bg-black/30 border-amber-200/20 dark:border-white/10;
+}
+
+.sidebar-item {
+  @apply bg-white/50 dark:bg-transparent text-black dark:text-white hover:bg-amber-50 dark:hover:bg-white/10;
+}
+
+.sidebar-item.active {
+  @apply bg-gradient-to-r from-amber-500 to-amber-600 text-white dark:text-white font-medium;
+}
+
+.sidebar-item:hover {
+  @apply text-amber-800 dark:text-white border-amber-400 dark:border-white/20;
+}
+
+.sidebar-item svg {
+  @apply text-amber-700 dark:text-white;
+}
+.sidebar-item:hover {
+  @apply text-gray-900 dark:text-white;
+}

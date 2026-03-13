@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 const User = require("../models/User");
-const { validateToken } = require("../controllers/authController"); 
+const { validateToken } = require("../controllers/authController");
 
 dotenv.config(); // Load environment variables
 
@@ -15,7 +15,7 @@ const SECRET_KEY = process.env.JWT_SECRET || "your_secret_key"; // Use .env for 
 // ✅ Register User
 router.post("/register", async (req, res) => {
   console.log("📌 Registering user:", req.body);
-  
+
   try {
     const { username, email, password, mobile } = req.body;
 
@@ -83,6 +83,14 @@ router.post("/login", async (req, res) => {
         email: user.email,
         mobile: user.mobile,
         profilePicture: user.profilePicture,
+        age: user.age,
+        gender: user.gender,
+        weight: user.weight,
+        height: user.height,
+        cookingSkill: user.cookingSkill,
+        dietPreferences: user.dietPreferences,
+        allergies: user.allergies,
+        preferredCuisines: user.preferredCuisines
       },
     });
 
@@ -106,13 +114,28 @@ router.get("/validate", async (req, res) => {
       return res.status(404).json({ valid: false, message: "User not found." });
     }
 
-    res.status(200).json({ valid: true, user });
+    res.status(200).json({
+      valid: true,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        mobile: user.mobile,
+        profilePicture: user.profilePicture,
+        age: user.age,
+        gender: user.gender,
+        weight: user.weight,
+        height: user.height,
+        cookingSkill: user.cookingSkill,
+        dietPreferences: user.dietPreferences,
+        allergies: user.allergies,
+        preferredCuisines: user.preferredCuisines
+      }
+    });
   } catch (error) {
     console.error("Token validation error:", error.message);
     res.status(401).json({ valid: false, message: "Invalid or expired token" });
   }
 });
-
-
 
 module.exports = router;

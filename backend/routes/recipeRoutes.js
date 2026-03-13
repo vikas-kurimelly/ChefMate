@@ -1,10 +1,11 @@
 const express = require("express");
 const multer = require("multer");
 const Recipe = require("../models/Recipe");
-const upload = require("../middlewares/upload"); // ✅ Added multer upload middleware
+const upload = require("../middlewares/upload");
 const User = require("../models/User");
 const router = express.Router();
 const { getRecommendations } = require("../controllers/recipeController");
+const { generateRecipesFromIngredients } = require("../services/geminiService");
 
 router.get('/recommendations/:userId', getRecommendations);
 
@@ -22,7 +23,7 @@ const storage = multer.diskStorage({
 router.post("/add", upload.single("image"), async (req, res) => {
   try {
     const { title, ingredients, instructions, cuisine, difficulty, category, prepTime, cookTime, servings, nutrition } = req.body;
-    
+
     const newRecipe = new Recipe({
       title,
       ingredients: ingredients.split(","), // Ensure array format
@@ -33,6 +34,9 @@ router.post("/add", upload.single("image"), async (req, res) => {
       prepTime,
       cookTime,
       servings,
+      dietType: req.body.dietType,
+      mealType: req.body.mealType,
+      mainCourseRegion: req.body.mainCourseRegion,
       nutrition: JSON.parse(nutrition),
       image: req.file ? `/uploads/${req.file.filename}` : "", // Save image path
     });
@@ -88,7 +92,7 @@ router.post("/:id/upload-image", upload.single("image"), async (req, res) => {
 // 🔍 Advanced Search & Filtering Route
 router.get("/search", async (req, res) => {
   try {
-    const { title, ingredients, cuisine, category, difficulty, page = 1, limit = 10, sort } = req.query;
+    const { title, ingredients, cuisine, category, difficulty, mealType, dietType, mainCourseRegion, page = 1, limit = 10, sort } = req.query;
     let query = {};
 
     if (title) {
@@ -112,6 +116,15 @@ router.get("/search", async (req, res) => {
 
     if (difficulty) {
       query.difficulty = difficulty;
+    }
+    if (mealType) {
+      query.mealType = { $regex: mealType, $options: "i" };
+    }
+    if (dietType) {
+      query.dietType = { $regex: dietType, $options: "i" };
+    }
+    if (mainCourseRegion) {
+      query.mainCourseRegion = { $regex: mainCourseRegion, $options: "i" };
     }
 
     let sortOptions = {};
@@ -334,6 +347,11 @@ router.get("/search", async (req, res) => {
       cuisine,
       category,
       difficulty,
+      mealType,
+      dietType,
+      mainCourseRegion,
+      prepTime,
+      cookTime,
       page = 1,
       limit = 10,
       sort,
@@ -363,6 +381,15 @@ router.get("/search", async (req, res) => {
 
     if (difficulty) {
       query.difficulty = difficulty;
+    }
+    if (mealType) {
+      query.mealType = { $regex: mealType, $options: "i" };
+    }
+    if (dietType) {
+      query.dietType = { $regex: dietType, $options: "i" };
+    }
+    if (mainCourseRegion) {
+      query.mainCourseRegion = { $regex: mainCourseRegion, $options: "i" };
     }
 
     // ✅ Allergy filter
@@ -406,5 +433,26 @@ router.get("/search", async (req, res) => {
   }
 });
 
+
+// Recipe Generation Route
+router.post('/generate', async (req, res) => {
+  try {
+    const { ingredients } = req.body;
+    
+    if (!ingredients || !Array.isArray(ingredients) || ingredients.length === 0) {
+      return res.status(400).json({ 
+        error: 'Please provide a valid list of ingredients' 
+      });
+    }
+
+    const recipe = await generateRecipesFromIngredients(ingredients);
+    res.json(recipe);
+  } catch (error) {
+    console.error('Recipe generation error:', error);
+    res.status(500).json({ 
+      error: error.message || 'Failed to generate recipe' 
+    });
+  }
+});
 
 module.exports = router;

@@ -1,32 +1,51 @@
+// src/components/DashboardSidebar.jsx
+
 import "../styles/DashboardSidebar.css";
+import chefMateLogo from "../assets/img/logo/logo2.png";
+import { useNavigate } from "react-router-dom";
 import {
   Utensils,
   BookOpenCheck,
   ChefHat,
+  Heart,
   ClipboardList,
   Brain,
   Image,
   Mic,
+  Bot,
   Calendar,
   ListTodo,
+  CookingPot,
   ShieldCheck,
+  ShoppingCart,
+  Medal,
+  Bell,
+  Users,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
 import clsx from "clsx";
+import { useState, useEffect } from "react";
+// Remove these imports as they're no longer needed
+// import { Sun, Moon } from "lucide-react";
 
-const DashboardSidebar = ({ isOpen: parentSidebarState, setSidebarOpen }) => {
+const DashboardSidebar = ({
+  isOpen: parentSidebarState,
+  setSidebarOpen,
+  selectedMenu,
+  setSelectedMenu,
+}) => {
+  const navigate = useNavigate();
+
   const navItems = [
-    { label: "Explore", icon: Utensils, path: "/dashboard" }, // ✅ Add path
+    { label: "Explore", icon: Utensils },
+    { label: "Favorites", icon: Heart },
+    { label: "What’s in My Kitchen", icon: ClipboardList },
+    { label: "Image Search", icon: Image },
+    { label: "Meal Planner", icon: Calendar },
+    { label: "Shopping List", icon: ShoppingCart },
     { label: "My Recipes", icon: BookOpenCheck },
     { label: "Add Recipe", icon: ChefHat },
-    { label: "PantyChef", icon: ClipboardList },
-    { label: "MacrosChef", icon: Brain },
-    { label: "Image Search", icon: Image },
-    { label: "Voice Search", icon: Mic },
-    { label: "Meal Planner", icon: Calendar },
-    { label: "Shopping List", icon: ListTodo },
-    { label: "Preferences", icon: ShieldCheck },
   ];
 
   return (
@@ -34,14 +53,41 @@ const DashboardSidebar = ({ isOpen: parentSidebarState, setSidebarOpen }) => {
       className={clsx(
         "dashboard-sidebar",
         parentSidebarState ? "sidebar-expanded" : "sidebar-collapsed",
-        "dark"
+        "transition-all duration-300 ease-in-out"
       )}
     >
-      {/* Sidebar Items */}
+      {/* Logo and Brand Name */}
+      <div className="sidebar-header">
+        <div className="sidebar-brand" onClick={() => navigate("/")}>
+          <div className="logo-container">
+            <img
+              src={chefMateLogo}
+              alt="ChefMate Logo"
+              className="sidebar-logo"
+              width={50}
+              height={50}
+            />
+          </div>
+          {parentSidebarState && (
+            <h2 className="brand-text">
+              CHEF<span className="accent-text">MATE</span>
+            </h2>
+          )}
+        </div>
+      </div>
+
       <div className="px-2 space-y-2 pb-6">
         {navItems.map(({ label, icon: Icon }) => (
-          <div key={label} className="sidebar-item dark group relative">
-            <div className="flex items-center gap-3">
+          <div
+            key={label}
+            className={clsx(
+              "sidebar-item",
+              "group relative",
+              selectedMenu === label && "active"
+            )}
+            onClick={() => setSelectedMenu(label)}
+          >
+            <div className="flex items-center gap-3 cursor-pointer">
               <Icon size={20} />
               {parentSidebarState ? (
                 <span>{label}</span>
@@ -53,16 +99,22 @@ const DashboardSidebar = ({ isOpen: parentSidebarState, setSidebarOpen }) => {
         ))}
       </div>
 
-      {/* Bottom Toggle Button */}
-      <div className="p-2 border-t border-gray-200 dark:border-gray-700">
+      <div className="collapse-button-container">
         <button
           onClick={() => setSidebarOpen((prev) => !prev)}
           className={clsx(
-            "flex items-center justify-center rounded transition hover:bg-gray-200 dark:hover:bg-gray-800",
-            parentSidebarState ? "w-full p-2" : "w-10 h-10 mx-auto"
+            "collapse-button",
+            parentSidebarState ? "expanded" : "collapsed"
           )}
+          aria-label={
+            parentSidebarState ? "Collapse sidebar" : "Expand sidebar"
+          }
         >
-          {parentSidebarState ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+          {parentSidebarState ? (
+            <ChevronLeft size={20} />
+          ) : (
+            <ChevronRight size={20} />
+          )}
         </button>
       </div>
     </aside>

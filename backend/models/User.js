@@ -8,9 +8,9 @@ if (!mongoose.models.User) {
     username: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true },
     password: { type: String, required: true },
-    mobile: { 
-      type: String, 
-      required: true, 
+    mobile: {
+      type: String,
+      required: true,
       unique: true,
       match: [/^\d{10}$/, "Invalid mobile number format"]
     },
@@ -22,6 +22,12 @@ if (!mongoose.models.User) {
     shoppingList: [{ type: mongoose.Schema.Types.ObjectId, ref: "Ingredient" }],
     mealPlans: [{ type: mongoose.Schema.Types.ObjectId, ref: "MealPlan" }],
     role: { type: String, enum: ["user", "admin"], default: "user" },
+    age: { type: Number },
+    gender: { type: String, enum: ["Male", "Female", "Other"] },
+    weight: { type: Number },
+    height: { type: Number },
+    cookingSkill: { type: String, enum: ["Beginner", "Intermediate", "Advanced"] },
+    preferredCuisines: [{ type: String }],
   }, { timestamps: true });
 
   // ✅ Remove hashing from pre("save") to avoid double hashing

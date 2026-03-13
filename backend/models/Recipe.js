@@ -8,17 +8,19 @@ const RecipeSchema = new mongoose.Schema(
     cuisine: { type: String },
     difficulty: { type: String, enum: ["Easy", "Medium", "Hard"] },
     image: { type: String, default: "" }, // ✅ Stores the uploaded image path (handled via multer)
-    category: { type: String },
+    category: { type: String }, // veg, non-veg, ice creams, sweets, desserts, snacks, breads, drinks, salads, starters, juices
     prepTime: { type: Number },
     cookTime: { type: Number },
     servings: { type: Number },
+    dietType: { type: String }, // high, low, balanced
+    mealType: { type: String }, // breakfast, lunch, dinner
+    mainCourseRegion: { type: String }, // South, North, East, West
     nutrition: {
       calories: { type: Number },
       protein: { type: Number },
       fat: { type: Number },
       carbs: { type: Number },
     },
-    // ✅ Added ratings without touching old code
     ratings: [
       {
         user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },

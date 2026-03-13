@@ -1,0 +1,16 @@
+:root {
+  --primary: #ffd700;
+  --primary-light: #ffeb3b;
+  --primary-dark: #ffc107;
+  --bg-glass: rgba(255, 255, 255, 0.1);
+  --bg-overlay: rgba(0, 0, 0, 0.3);
+  --text-primary: #2d3436;
+  --text-secondary: #636e72;
+  --shadow-primary: rgba(255, 215, 0, 0.3);
+  --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  --gradient-primary: linear-gradient(
+    135deg,
+    var(--primary),
+    var(--primary-light)
+  );
+}

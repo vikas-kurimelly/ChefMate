@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import User from "../models/User.js"; 
+import User from "../models/User.js";
 
 // ✅ Register a New User
 export const register = async (req, res) => {
@@ -30,6 +30,9 @@ export const register = async (req, res) => {
 };
 
 // ✅ Login User
+// authController.js
+
+// ✅ Login User
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -50,9 +53,23 @@ export const login = async (req, res) => {
       { expiresIn: "7d" }
     );
 
+    // Sending additional user details (including personal settings) along with the token
     res.status(200).json({
       token,
-      user: { id: user._id, username: user.username, email: user.email, profilePicture: user.profilePicture },
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        profilePicture: user.profilePicture,
+        age: user.age,
+        gender: user.gender,
+        weight: user.weight,
+        height: user.height,
+        cookingSkill: user.cookingSkill,
+        dietPreferences: user.dietPreferences,
+        allergies: user.allergies,
+        preferredCuisines: user.preferredCuisines,
+      },
     });
 
   } catch (error) {
@@ -60,6 +77,8 @@ export const login = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+
 
 // ✅ Validate Token
 
@@ -76,26 +95,46 @@ export const validateToken = (req, res) => {
   }
 };
 
+// PUT /auth/profile-picture/:userId
 export const updateProfilePicture = async (req, res) => {
   try {
-    const { userId } = req.params; // Get the user ID from URL
-    const { profilePicture } = req.body; // Get the new profile picture URL
+    const { userId } = req.params;
+    const file = req.file;
 
-    // ✅ Find the user and update the profile picture
-    const user = await User.findByIdAndUpdate(
-      userId,
-      { profilePicture },
-      { new: true } // ✅ Return the updated user data
-    );
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+    if (!file) {
+      return res.status(400).json({ message: "No image file uploaded" });
     }
 
-    console.log("✅ Profile picture updated:", user.profilePicture);
-    res.status(200).json({ message: "Profile updated", user });
+    // ✅ Upload to Cloudinary using stream
+    const uploadFromBuffer = () =>
+      new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "profile_pics" },
+          (error, result) => {
+            if (result) resolve(result);
+            else reject(error);
+          }
+        );
+        streamifier.createReadStream(file.buffer).pipe(stream);
+      });
+
+    const result = await uploadFromBuffer();
+
+    // ✅ Save Cloudinary URL to MongoDB
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { profilePicture: result.secure_url },
+      { new: true }
+    );
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.status(200).json({
+      message: "Profile picture updated successfully",
+      profilePicture: user.profilePicture,
+    });
   } catch (error) {
-    console.error("❌ Error updating profile:", error);
+    console.error("❌ Error updating profile picture:", error.message);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
@@ -148,3 +187,44 @@ export const changePassword = async (req, res) => {
 
 
 
+export const updatePersonalSettings = async (req, res) => {
+  console.log("User ID from middleware:", req.userId);
+
+  try {
+    const userId = req.userId;
+    const user = await User.findById(userId);
+    console.log("User found:", user);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update personal settings
+    const {
+      age,
+      gender,
+      weight,
+      height,
+      cookingSkill,
+      dietPreferences,
+      allergies,
+      preferredCuisines,
+    } = req.body;
+
+    user.age = age || user.age;
+    user.gender = gender || user.gender;
+    user.weight = weight || user.weight;
+    user.height = height || user.height;
+    user.cookingSkill = cookingSkill || user.cookingSkill;
+    user.dietPreferences = dietPreferences || user.dietPreferences;
+    user.allergies = allergies || user.allergies;
+    user.preferredCuisines = preferredCuisines || user.preferredCuisines;
+
+    await user.save();
+
+    res.status(200).json({ message: "Personal settings updated successfully", user });
+  } catch (error) {
+    console.error("Error updating personal settings:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};

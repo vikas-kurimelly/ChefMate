@@ -6,6 +6,10 @@ const User = require("../models/User"); // ✅ Ensure it's imported correctly
 const { authMiddleware, protect } = require("../middlewares/authMiddleware");
 const { updateProfilePicture, deleteAccount } = require("../controllers/authController"); // ✅ Now includes deleteAccount
 const { changePassword } = require("../controllers/authController"); // ✅ Ensure this is imported correctly
+const { updatePersonalSettings } = require("../controllers/authController"); // ✅ Ensure this is imported correctly
+const { getUserProfile } = require("../controllers/userController");
+const cloudinary = require("../cloudinary");
+const streamifier = require("streamifier");
 
 const router = express.Router();
 
@@ -86,53 +90,73 @@ router.put("/update", authMiddleware, async (req, res) => {
   }
 });
 
-// 🔹 Ensure 'uploads/' directory exists
-const uploadDir = path.join(__dirname, "../uploads");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// 🔹 Configure Multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir); // ✅ Ensures 'uploads/' exists before saving files
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  },
-});
-
+// Multer config for memory storage (no disk save)
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 /**
- * ✅ Upload Profile Picture
+ * ✅ Upload Profile Picture to Cloudinary
  */
-router.post("/upload-profile-picture", authMiddleware, upload.single("profilePicture"), async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: "No file uploaded" });
+router.post(
+  "/upload-profile-picture",
+  authMiddleware,
+  upload.single("profilePicture"),
+  async (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    try {
+      // Upload to Cloudinary from buffer
+      const streamUpload = (buffer) =>
+        new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { folder: "profile_pictures" },
+            (error, result) => {
+              if (result) resolve(result);
+              else reject(error);
+            }
+          );
+          streamifier.createReadStream(buffer).pipe(stream);
+        });
+
+      const result = await streamUpload(req.file.buffer);
+
+      // Save Cloudinary URL to user
+      const user = await User.findById(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      user.profilePicture = result.secure_url;
+      await user.save();
+
+      res.status(200).json({ profilePicture: user.profilePicture });
+    } catch (error) {
+      console.error("Cloudinary upload error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
   }
+);
 
+/**
+ * ✅ Get Logged-In User Profile (including personal settings)
+ */
+router.get("/profile", authMiddleware, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id); // ✅ Ensure req.user.id is used
-
+    const user = await User.findById(req.user.id).select("-password");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-
-    user.profilePicture = `http://localhost:5000/uploads/${req.file.filename}`;
-    await user.save();
-
-    res.status(200).json({ profilePicture: user.profilePicture });
+    res.status(200).json(user);
   } catch (error) {
-    console.error("Error uploading profile picture:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 
 /**
  * ✅ Update Profile Picture Route (Moved Below Initialization)
  */
-router.put("/profile-picture/:userId", updateProfilePicture); // ✅ Fixed position
+router.put("/profile-picture/:userId", upload.single("profilePicture"), updateProfilePicture);
 
 /**
  * ✅ Delete User Account
@@ -141,5 +165,8 @@ router.delete("/delete-account", authMiddleware, deleteAccount); // ✅ New dele
 
 router.post("/changepassword", authMiddleware, changePassword);
 
+router.put("/update-personal-settings", authMiddleware, updatePersonalSettings); // ✅ New route for updating personal settings
+
+router.get("/profilr", authMiddleware, getUserProfile);
 
 module.exports = router;

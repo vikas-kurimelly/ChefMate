@@ -1,0 +1,241 @@
+.image-search-container {
+  background: var(--bg-primary, white);
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 800px;
+  margin: 2rem auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.dark .image-search-container {
+  background: var(--bg-primary, #1a202c);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.image-search-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 2rem;
+  background: orangered;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dark .image-search-title {
+  background: linear-gradient(45deg, #ffd1a1, #ffaa6c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.file-input-container {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.drop-zone {
+  position: relative;
+  border: 2px dashed var(--border-color, #e2e8f0);
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  margin-top: 2rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  background: var(--bg-secondary, #f8f9fa);
+  cursor: pointer;
+}
+
+.dark .drop-zone {
+  background: var(--bg-secondary, #2d3748);
+  border-color: var(--border-color, #4a5568);
+}
+
+.drop-zone:hover,
+.drop-zone.drag-over {
+  border-color: var(--primary);
+  background: var(--bg-hover);
+}
+
+.drop-zone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  color: var(--text-secondary);
+}
+
+.file-input {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.camera-controls {
+  margin-bottom: 1rem;
+}
+
+.camera-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.camera-button:hover {
+  background: var(--primary-dark);
+}
+
+.camera-container {
+  margin: 1rem 0;
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  background: black;
+}
+
+.camera-preview {
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+}
+
+.capture-button {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.capture-button:hover {
+  background: var(--primary-dark);
+}
+
+.dark .camera-button,
+.dark .capture-button {
+  background: var(--primary-dark);
+}
+
+.dark .camera-button:hover,
+.dark .capture-button:hover {
+  background: var(--primary);
+}
+
+.preview-image {
+  width: 100%;
+  max-height: 400px;
+  object-fit: contain;
+  border-radius: 8px;
+  margin: 1rem 0;
+  border: 1px solid var(--border-color, #e2e8f0);
+}
+
+.dark .preview-image {
+  border-color: var(--border-color, #2d3748);
+}
+
+.submit-button {
+  width: 100%;
+  padding: 0.75rem;
+  background: orangered;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.submit-button:hover {
+  background: var(--primary-dark, #388e3c);
+}
+
+.submit-button:disabled {
+  background: var(--disabled, #ccc);
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: var(--error, #dc3545);
+  text-align: center;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+
+.ingredients-list {
+  margin-top: 2rem;
+  padding: 1rem;
+  background: var(--bg-secondary, #f8f9fa);
+  border-radius: 8px;
+}
+
+.dark .ingredients-list {
+  background: var(--bg-secondary, #2d3748);
+}
+
+.ingredients-list h2 {
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.ingredients-list ul {
+  list-style: none;
+  padding: 0;
+}
+
+.ingredients-list li {
+  padding: 0.5rem;
+  margin: 0.5rem 0;
+  background: var(--bg-primary, white);
+  border-radius: 4px;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dark .ingredients-list li {
+  background: var(--bg-primary, #1a202c);
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

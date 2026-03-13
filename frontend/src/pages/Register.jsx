@@ -1,10 +1,10 @@
-import { useState } from "react";
-import axios from "../services/axios";
+import React, { useState } from "react";
+import api from "../services/axios";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "../assets/register.css";
-import { BiMobile } from "react-icons/bi";
+import "../styles/register.css";
+import { FaUser, FaLock, FaEnvelope, FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -12,143 +12,204 @@ const Register = () => {
     username: "",
     email: "",
     password: "",
-    mobile: "", // ✅ Added mobile field
+    confirmPassword: "",
+    mobile: "",
   });
-
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleChange = (e) =>
+  const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setErrorMessage("");
-    setSuccessMessage("");
-  
-    // Clear any old tokens or data before registering
-    localStorage.removeItem("authToken"); 
-    localStorage.removeItem("user");
-  
+    setError("");
+
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
+      setLoading(false);
+      return;
+    }
+
     try {
-      const response = await axios.post("/auth/register", formData);
-  
-      if (response.status === 201 || response.status === 200) {
-        setSuccessMessage("✅ Registered successfully! Redirecting to login...");
-        setTimeout(() => navigate("/login"), 2000); // Redirect after 2 seconds
-      } else {
-        throw new Error("Unexpected response from server.");
-      }
+      const response = await api.post("/auth/register", {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        mobile: formData.mobile,
+      });
+      navigate("/login");
     } catch (error) {
-      const message = error.response?.data?.message || "Registration failed.";
-      setErrorMessage(`❌ ${message}`);
+      setError(
+        error.response?.data?.message || "Registration failed. Try again."
+      );
     } finally {
       setLoading(false);
     }
   };
-  
+
   return (
     <div className="register-page">
-      {/* Background Images */}
-      <img
-        src="/images/chef-left.jpg"
-        alt="Chef Left"
-        className="bg-image left"
-      />
-      <img
-        src="/images/chef-right.webp"
-        alt="Chef Right"
-        className="bg-image right"
-      />
-
-      {/* Form */}
       <motion.div
-        className="form-container bg-white p-5 rounded shadow"
+        className="register-form-container"
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <h2 className="text-center mb-4">Join ChefMate</h2>
+        <h2 className="register-title">Join ChefMate</h2>
 
-        {/* Error Message */}
-        {errorMessage && <p className="alert alert-danger">{errorMessage}</p>}
-
-        {/* Success Message */}
-        {successMessage && <p className="alert alert-success">{successMessage}</p>}
+        {error && (
+          <div
+            className="alert alert-danger d-flex align-items-center"
+            role="alert"
+          >
+            <div className="flex-shrink-0 me-2">
+              <i className="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <div>{error}</div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
-            <label>Username</label>
-            <input
-              type="text"
-              name="username"
-              className="form-control"
-              value={formData.username}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className="mb-3">
-            <label>Email</label>
-            <input
-              type="email"
-              name="email"
-              className="form-control"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className="mb-3">
-            <label>Password</label>
-            <input
-              type="password"
-              name="password"
-              className="form-control"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          {/* ✅ Added Mobile Number Field */}
-          <div className="mb-3">
-            <label>Mobile Number</label>
-            <div className="input-group">
-              <span className="input-group-text">
-                <BiMobile size={20} />
-              </span>
+            <label htmlFor="name" className="register-label">
+              Full Name
+            </label>
+            <div className="input-group register-input-group">
               <input
-                type="tel"
-                name="mobile"
-                className="form-control"
-                value={formData.mobile}
+                type="text"
+                className="form-control register-input"
+                id="username"
+                name="username"
+                placeholder="Enter your full name"
+                value={formData.username}
                 onChange={handleChange}
-                placeholder="Enter your mobile number"
                 required
               />
+            </div>
+          </div>
+          <div className="mb-3">
+            <label htmlFor="email" className="register-label">
+              Email address
+            </label>
+            <div className="input-group register-input-group">
+              <input
+                type="email"
+                className="form-control register-input"
+                id="email"
+                name="email"
+                placeholder="Enter your email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+          <div className="mb-3">
+            <label htmlFor="mobile" className="register-label">
+              Mobile Number
+            </label>
+            <div className="input-group register-input-group">
+              <input
+                type="tel"
+                className="form-control register-input"
+                id="mobile"
+                name="mobile"
+                placeholder="Enter your mobile number"
+                value={formData.mobile}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+          <div className="mb-3">
+            <label htmlFor="password" className="register-label">
+              Password
+            </label>
+            <div className="input-group register-input-group">
+              <input
+                type={showPassword ? "text" : "password"}
+                className="form-control register-input"
+                id="password"
+                name="password"
+                placeholder="Create a password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+              />
+              <span
+                className="input-group-text"
+                onClick={togglePasswordVisibility}
+                style={{ cursor: "pointer" }}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </span>
+            </div>
+          </div>
+          <div className="mb-3">
+            <label htmlFor="confirmPassword" className="register-label">
+              Confirm Password
+            </label>
+            <div className="input-group register-input-group">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                className="form-control register-input"
+                id="confirmPassword"
+                name="confirmPassword"
+                placeholder="Confirm your password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                required
+              />
+              <span
+                className="input-group-text"
+                onClick={toggleConfirmPasswordVisibility}
+                style={{ cursor: "pointer" }}
+              >
+                {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+              </span>
             </div>
           </div>
 
           <button
             type="submit"
-            className="btn btn-warning w-100"
+            className="btn register-button"
             disabled={loading}
           >
-            {loading ? "Registering..." : "Register"}
+            {loading ? (
+              <>
+                <span
+                  className="spinner-border spinner-border-sm me-2"
+                  role="status"
+                  aria-hidden="true"
+                ></span>
+                Creating account...
+              </>
+            ) : (
+              "Register"
+            )}
           </button>
         </form>
 
-        {/* Login Link */}
         <div className="text-center mt-3">
-          Already have an account?{" "}
-          <Link to="/login" className="text-decoration-none text-primary fw-bold">
-            Login
-          </Link>
+          <p className="mb-0 register-text">
+            Already have an account?{" "}
+            <Link to="/login" className="register-link">
+              Login
+            </Link>
+          </p>
         </div>
       </motion.div>
     </div>

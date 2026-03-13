@@ -53,22 +53,20 @@ const addFavorite = async (req, res) => {
 const getFavorites = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { search = "", page = 1, limit = 10 } = req.query; // Default pagination values
+    const { search = "", page = 1, limit = 10 } = req.query;
 
-    // Find user & populate favorites with pagination & search
     const user = await User.findById(userId)
       .populate({
         path: "favorites",
-        match: search ? { name: { $regex: search, $options: "i" } } : {}, // Search by name (case-insensitive)
-        select: "name description imageUrl createdAt updatedAt", // Select specific fields
-        options: { sort: { createdAt: -1 }, skip: (page - 1) * limit, limit: parseInt(limit) }, // Pagination
+        match: search ? { title: { $regex: search, $options: "i" } } : {},
+        select: "title ingredients instructions cuisine difficulty image category prepTime cookTime servings dietType mealType mainCourseRegion nutrition", // Added all needed fields
+        options: { sort: { createdAt: -1 }, skip: (page - 1) * limit, limit: parseInt(limit) },
       });
 
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
 
-    // Handle empty favorites list
     if (!user.favorites || user.favorites.length === 0) {
       return res.status(200).json({ message: "No favorite recipes found.", favorites: [] });
     }
@@ -93,17 +91,15 @@ const removeFavorite = async (req, res) => {
     const userId = req.user._id;
     const { recipeId } = req.params;
 
-    // Validate recipeId format
     if (!mongoose.Types.ObjectId.isValid(recipeId)) {
       return res.status(400).json({ message: "Invalid recipe ID format." });
     }
 
-    // Find the user and remove the recipe from favorites
     const user = await User.findByIdAndUpdate(
       userId,
-      { $pull: { favorites: recipeId } }, // Remove from favorites
+      { $pull: { favorites: recipeId } },
       { new: true }
-    ).populate("favorites", "name description imageUrl createdAt updatedAt");
+    ).populate("favorites", "title ingredients instructions cuisine difficulty image category prepTime cookTime servings dietType mealType mainCourseRegion nutrition");
 
     if (!user) {
       return res.status(404).json({ message: "User not found." });
